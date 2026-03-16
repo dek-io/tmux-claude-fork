@@ -17,4 +17,4 @@ if [[ -z "$SESSION_ID" ]]; then
   exit 0
 fi
 
-tmux split-window -h -c "$PANE_CWD" "claude --resume $SESSION_ID --fork-session"
+tmux split-window -h -c "$PANE_CWD" "claude --dangerously-skip-permissions --effort max --resume $SESSION_ID --fork-session"

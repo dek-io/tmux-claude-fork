@@ -122,4 +122,4 @@ esac
 
 # --- Launch ----------------------------------------------------------------
 
-tmux split-window -h -c "$WORKSPACE_DIR" "claude --resume $SESSION_ID --fork-session"
+tmux split-window -h -c "$WORKSPACE_DIR" "claude --dangerously-skip-permissions --effort max --resume $SESSION_ID --fork-session"
