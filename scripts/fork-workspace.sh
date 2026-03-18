@@ -132,4 +132,4 @@ esac
 
 # --- Launch ----------------------------------------------------------------
 
-tmux split-window -h -c "$WORKSPACE_DIR" "$WRAPPER $SESSION_ID $MODE_FLAG --effort max"
+tmux split-window -h -c "$WORKSPACE_DIR" "'$WRAPPER' '$SESSION_ID' $MODE_FLAG --effort max"

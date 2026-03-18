@@ -12,11 +12,11 @@
 # and we delete it.
 
 INPUT=$(cat)
-HOOK_SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
+HOOK_SESSION_ID=$(printf '%s\n' "$INPUT" | jq -r '.session_id // empty')
 [[ -z "$HOOK_SESSION_ID" ]] && exit 0
 
-PERMISSION_MODE=$(echo "$INPUT" | jq -r '.permission_mode // "bypassPermissions"')
-CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+PERMISSION_MODE=$(printf '%s\n' "$INPUT" | jq -r '.permission_mode // "bypassPermissions"')
+CWD=$(printf '%s\n' "$INPUT" | jq -r '.cwd // empty')
 
 # Determine session key: tmux pane ID or TTY name
 if [[ -n "$TMUX_PANE" ]]; then

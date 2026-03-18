@@ -27,4 +27,4 @@ case "$PERMISSION_MODE" in
   *)                 MODE_FLAG="--permission-mode $PERMISSION_MODE" ;;
 esac
 
-tmux split-window -h -c "$PANE_CWD" "$WRAPPER $SESSION_ID $MODE_FLAG --effort max"
+tmux split-window -h -c "$PANE_CWD" "'$WRAPPER' '$SESSION_ID' $MODE_FLAG --effort max"

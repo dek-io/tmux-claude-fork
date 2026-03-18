@@ -39,7 +39,7 @@ BEFORE=$(ls "$SESSIONS_DIR"/*.jsonl 2>/dev/null | sort)
 
 # Background: poll for a new JSONL file and update the tracking file
 (
-  for i in $(seq 1 30); do
+  for _ in $(seq 1 30); do
     sleep 1
     AFTER=$(ls "$SESSIONS_DIR"/*.jsonl 2>/dev/null | sort)
     NEW_FILE=$(comm -13 <(echo "$BEFORE") <(echo "$AFTER") | head -1)
