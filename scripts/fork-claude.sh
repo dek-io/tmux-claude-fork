@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WRAPPER="$SCRIPT_DIR/fork-wrapper.sh"
+
 PANE_ID=$(tmux display-message -p '#{pane_id}')
 PANE_CWD=$(tmux display-message -p '#{pane_current_path}')
 
@@ -10,11 +13,18 @@ if [[ ! -f "$SESSION_FILE" ]]; then
   exit 0
 fi
 
-SESSION_ID=$(cat "$SESSION_FILE")
+SESSION_ID=$(jq -r '.session_id' "$SESSION_FILE")
+PERMISSION_MODE=$(jq -r '.permission_mode // "bypassPermissions"' "$SESSION_FILE")
 
-if [[ -z "$SESSION_ID" ]]; then
+if [[ -z "$SESSION_ID" || "$SESSION_ID" == "null" ]]; then
   tmux display-message "No Claude session in this pane"
   exit 0
 fi
 
-tmux split-window -h -c "$PANE_CWD" "claude --dangerously-skip-permissions --effort max --resume $SESSION_ID --fork-session"
+# Map permission mode to CLI flag
+case "$PERMISSION_MODE" in
+  bypassPermissions) MODE_FLAG="--dangerously-skip-permissions" ;;
+  *)                 MODE_FLAG="--permission-mode $PERMISSION_MODE" ;;
+esac
+
+tmux split-window -h -c "$PANE_CWD" "'$WRAPPER' '$SESSION_ID' $MODE_FLAG --effort max"
