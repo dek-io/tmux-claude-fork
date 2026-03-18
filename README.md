@@ -182,10 +182,7 @@ set-option -g @claude-workspace-setup 'my-worktree-tool create "$WORKSPACE_DIR" 
 
 ## Permission mode
 
-The forked session preserves the original session's permission mode:
-
-- **tmux:** Always uses `--dangerously-skip-permissions` (matching original behavior)
-- **iTerm2:** Reads the `permission_mode` from the session tracking file and passes the corresponding flag. Falls back to `--dangerously-skip-permissions` if the mode cannot be determined.
+The forked session preserves the original session's permission mode. The `SessionStart` hook stores the `permission_mode` from each session, and the fork scripts read it to pass the corresponding CLI flag. If the mode cannot be determined, it falls back to `--dangerously-skip-permissions`.
 
 ## Requirements
 

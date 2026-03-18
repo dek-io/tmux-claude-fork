@@ -28,11 +28,18 @@ if [[ ! -f "$SESSION_FILE" ]]; then
 fi
 
 SESSION_ID=$(jq -r '.session_id' "$SESSION_FILE")
+PERMISSION_MODE=$(jq -r '.permission_mode // "bypassPermissions"' "$SESSION_FILE")
 
 if [[ -z "$SESSION_ID" || "$SESSION_ID" == "null" ]]; then
   tmux display-message "No Claude session in this pane"
   exit 0
 fi
+
+# Map permission mode to CLI flag
+case "$PERMISSION_MODE" in
+  bypassPermissions) MODE_FLAG="--dangerously-skip-permissions" ;;
+  *)                 MODE_FLAG="--permission-mode $PERMISSION_MODE" ;;
+esac
 
 # --- Workspace mode --------------------------------------------------------
 # Priority: .claude-fork in repo root → tmux option → auto-detect
@@ -125,4 +132,4 @@ esac
 
 # --- Launch ----------------------------------------------------------------
 
-tmux split-window -h -c "$WORKSPACE_DIR" "$WRAPPER $SESSION_ID --dangerously-skip-permissions --effort max"
+tmux split-window -h -c "$WORKSPACE_DIR" "$WRAPPER $SESSION_ID $MODE_FLAG --effort max"
