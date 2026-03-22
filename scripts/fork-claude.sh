@@ -3,7 +3,7 @@
 PANE_ID=$(tmux display-message -p '#{pane_id}')
 PANE_CWD=$(tmux display-message -p '#{pane_current_path}')
 
-SESSION_FILE="/tmp/claude-sessions/$PANE_ID"
+SESSION_FILE="$HOME/.local/state/tmux-claude-sessions/$PANE_ID"
 
 if [[ ! -f "$SESSION_FILE" ]]; then
   tmux display-message "No Claude session in this pane"
@@ -17,4 +17,4 @@ if [[ -z "$SESSION_ID" ]]; then
   exit 0
 fi
 
-tmux split-window -h -c "$PANE_CWD" "claude --dangerously-skip-permissions --effort max --resume $SESSION_ID --fork-session"
+tmux split-window -h -c "$PANE_CWD" "claude --dangerously-skip-permissions --effort max --resume $SESSION_ID --fork-session 2>&1; echo '=== EXITED WITH CODE '$?' ==='; sleep 10"

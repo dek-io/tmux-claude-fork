@@ -17,7 +17,7 @@ SOURCE_DIR=$(tmux display-message -p '#{pane_current_path}')
 
 # --- Session ID -----------------------------------------------------------
 
-SESSION_FILE="/tmp/claude-sessions/$PANE_ID"
+SESSION_FILE="$HOME/.local/state/tmux-claude-sessions/$PANE_ID"
 
 if [[ ! -f "$SESSION_FILE" ]]; then
   tmux display-message "No Claude session in this pane"

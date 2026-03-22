@@ -7,6 +7,6 @@
 SESSION_ID=$(jq -r '.session_id // empty')
 [[ -z "$SESSION_ID" ]] && exit 0
 
-DIR="/tmp/claude-sessions"
+DIR="$HOME/.local/state/tmux-claude-sessions"
 mkdir -p "$DIR"
 echo "$SESSION_ID" > "$DIR/$TMUX_PANE"
