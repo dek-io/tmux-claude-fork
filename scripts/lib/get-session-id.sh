@@ -16,11 +16,3 @@ else
   tmux display-message "No --session-id or --resume found (start Claude with cc)"
   exit 0
 fi
-
-# Check that the session has a JSONL transcript (created on first message)
-CWD=$(tmux display-message -p '#{pane_current_path}')
-SANITIZED_CWD=$(cd "$CWD" && pwd -P | tr '/' '-')
-if ! ls "$HOME/.claude/projects/$SANITIZED_CWD/$SESSION_ID".jsonl &>/dev/null; then
-  tmux display-message "Send a message first — session has no transcript yet"
-  exit 0
-fi
