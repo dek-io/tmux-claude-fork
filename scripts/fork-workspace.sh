@@ -12,24 +12,13 @@
 
 set -euo pipefail
 
-PANE_ID=$(tmux display-message -p '#{pane_id}')
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CC_SH="$SCRIPT_DIR/../shell/cc.sh"
+
+PANE_PID=$(tmux display-message -p '#{pane_pid}')
 SOURCE_DIR=$(tmux display-message -p '#{pane_current_path}')
 
-# --- Session ID -----------------------------------------------------------
-
-SESSION_FILE="$HOME/.local/state/tmux-claude-sessions/$PANE_ID"
-
-if [[ ! -f "$SESSION_FILE" ]]; then
-  tmux display-message "No Claude session in this pane"
-  exit 0
-fi
-
-SESSION_ID=$(cat "$SESSION_FILE")
-
-if [[ -z "$SESSION_ID" ]]; then
-  tmux display-message "No Claude session in this pane"
-  exit 0
-fi
+source "$SCRIPT_DIR/lib/get-session-id.sh"
 
 # --- Workspace mode --------------------------------------------------------
 # Priority: .claude-fork in repo root → tmux option → auto-detect
@@ -122,4 +111,4 @@ esac
 
 # --- Launch ----------------------------------------------------------------
 
-tmux split-window -h -c "$WORKSPACE_DIR" "claude --dangerously-skip-permissions --effort max --resume $SESSION_ID --fork-session"
+tmux split-window -h -c "$WORKSPACE_DIR" "source '$CC_SH' && cc --resume '$SESSION_ID' --fork-session"

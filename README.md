@@ -8,8 +8,8 @@ Point your Claude Code agent at this README to install:
 
 ## How it works
 
-1. A Claude Code `SessionStart` hook writes the active session ID to `/tmp/claude-sessions/<pane_id>` whenever a session starts or is resumed (including via `/resume`)
-2. `Prefix + C-f` forks the session into a new pane (same directory)
+1. The `cc` shell wrapper starts Claude with `--session-id <uuid>` so every session has a known ID
+2. `Prefix + C-f` reads the session ID from the running process's args and forks into a new pane
 3. `Prefix + C-g` forks into a new pane with an isolated workspace
 
 ## Key bindings
@@ -28,36 +28,16 @@ Point your Claude Code agent at this README to install:
 ln -s /path/to/tmux-claude-fork ~/.config/tmux/plugins/tmux-claude-fork
 ```
 
-### 2. Copy the hook
+### 2. Source the `cc` wrapper in your shell profile
 
 ```bash
-mkdir -p ~/.claude/hooks
-cp hooks/track-session.sh ~/.claude/hooks/track-session.sh
-chmod +x ~/.claude/hooks/track-session.sh
+# Add to ~/.zshrc or ~/.bashrc:
+source ~/.config/tmux/plugins/tmux-claude-fork/shell/cc.sh
 ```
 
-### 3. Register the hook in `~/.claude/settings.json`
+Then use `cc` instead of `claude` to start sessions. This assigns each session a UUID via `--session-id` so the fork scripts can identify which session is running.
 
-Add this to your settings (merge with existing keys):
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/track-session.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### 4. Load the plugin in your tmux config
+### 3. Load the plugin in your tmux config
 
 Add before your TPM `run-shell` line (if using TPM):
 
@@ -131,6 +111,5 @@ set-option -g @claude-workspace-setup 'my-worktree-tool create "$WORKSPACE_DIR" 
 ## Requirements
 
 - tmux
-- `jq` (for parsing hook JSON)
-- Claude Code with hooks support
+- Claude Code with `--session-id` support (v2.1+)
 - `git` or `jj` (for workspace modes, optional)
