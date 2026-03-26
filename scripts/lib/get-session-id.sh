@@ -10,8 +10,10 @@ fi
 CLAUDE_ARGS=$(ps -o args= -p "$CHILD_PID" 2>/dev/null)
 if [[ "$CLAUDE_ARGS" =~ --session-id[[:space:]]([0-9a-f-]+) ]]; then
   SESSION_ID="${BASH_REMATCH[1]}"
+elif [[ "$CLAUDE_ARGS" =~ --resume[[:space:]]([0-9a-f-]+) ]]; then
+  SESSION_ID="${BASH_REMATCH[1]}"
 else
-  tmux display-message "No --session-id found (start Claude with cc)"
+  tmux display-message "No --session-id or --resume found (start Claude with cc)"
   exit 0
 fi
 

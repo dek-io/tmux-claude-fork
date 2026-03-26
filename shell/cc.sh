@@ -17,7 +17,7 @@ unalias ccf 2>/dev/null
 cc() {
   local arg
   for arg in "$@"; do
-    if [[ "$arg" == "--session-id" ]]; then
+    if [[ "$arg" == "--session-id" || "$arg" == "--resume" ]]; then
       command claude "${CC_DEFAULT_FLAGS[@]}" "$@"
       return
     fi
