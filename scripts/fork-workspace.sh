@@ -111,4 +111,5 @@ esac
 
 # --- Launch ----------------------------------------------------------------
 
-tmux split-window -h -c "$WORKSPACE_DIR" "source '$CC_SH' && cc --resume '$SESSION_ID' --fork-session"
+NEW_PANE=$(tmux split-window -h -c "$WORKSPACE_DIR" -P -F '#{pane_id}')
+tmux send-keys -t "$NEW_PANE" "source '$CC_SH' && cc --resume '$SESSION_ID' --fork-session" Enter

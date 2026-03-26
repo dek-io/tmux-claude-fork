@@ -12,4 +12,5 @@ PANE_CWD=$(tmux display-message -p '#{pane_current_path}')
 
 source "$SCRIPT_DIR/lib/get-session-id.sh"
 
-tmux split-window -h -c "$PANE_CWD" "source '$CC_SH' && cc --resume '$SESSION_ID' --fork-session"
+NEW_PANE=$(tmux split-window -h -c "$PANE_CWD" -P -F '#{pane_id}')
+tmux send-keys -t "$NEW_PANE" "source '$CC_SH' && cc --resume '$SESSION_ID' --fork-session" Enter
