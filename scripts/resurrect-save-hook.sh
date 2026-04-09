@@ -21,12 +21,22 @@ while IFS= read -r line; do
   if [[ "$line" == pane$'\t'* ]]; then
     IFS=$'\t' read -ra fields <<< "$line"
     full_cmd="${fields[10]:-}"
+    pane_dir="${fields[7]:-}"
 
     if [[ "$full_cmd" == *claude* && "$full_cmd" != *--resume* ]]; then
       if [[ "$full_cmd" =~ --session-id[[:space:]]([0-9a-f-]+) ]]; then
         fields[10]=":claude --resume ${BASH_REMATCH[1]}"
-        line="$(IFS=$'\t'; echo "${fields[*]}")"
       fi
+    fi
+
+    # Strip .claude/worktrees/<name> from Claude pane dirs so resurrect
+    # restores into the original project dir (where the session JSONL lives).
+    if [[ "$full_cmd" == *claude* && "$pane_dir" == */.claude/worktrees/* ]]; then
+      fields[7]="${pane_dir%%/.claude/worktrees/*}"
+    fi
+
+    if [[ "${fields[10]:-}" != "$full_cmd" || "${fields[7]:-}" != "$pane_dir" ]]; then
+      line="$(IFS=$'\t'; echo "${fields[*]}")"
     fi
   fi
   printf '%s\n' "$line"

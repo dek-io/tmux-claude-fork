@@ -1,0 +1,35 @@
+#!/usr/bin/expect -f
+# Spawns claude, auto-accepts startup dialogs (workspace trust + dev channels),
+# then hands full TTY control back to the user via interact.
+
+# Match the user's terminal dimensions
+set rows [exec tput lines]
+set cols [exec tput cols]
+
+spawn -noecho {*}$argv
+
+# Set PTY size to match real terminal
+stty rows $rows cols $cols
+
+# Auto-accept up to 2 startup dialogs that may appear in sequence:
+#   1. "Is this a project you trust?" (workspace trust, new directories only)
+#   2. "--dangerously-load-development-channels" warning
+# Ink renders with ANSI escape codes between words, so use glob *word*word*
+set dialogs 0
+while {$dialogs < 2} {
+    expect {
+        -gl "*trust*this*folder*" {
+            send "\r"
+            incr dialogs
+        }
+        -gl "*using*this*for*local*development*" {
+            send "\r"
+            incr dialogs
+        }
+        timeout {
+            break
+        }
+    }
+}
+
+interact

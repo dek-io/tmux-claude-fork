@@ -13,18 +13,37 @@
 # Remove any existing alias before defining function
 unalias cc 2>/dev/null
 unalias ccf 2>/dev/null
+unalias ccs 2>/dev/null
+
+_cc_run() {
+  # Auto-accept startup dialogs (trust + dev channels) via tmux send-keys.
+  # No PTY wrapper needed — claude runs with direct TTY access.
+  if [[ -n "$TMUX" ]]; then
+    local pane
+    pane=$(tmux display-message -p '#{pane_id}')
+    # Send Enter twice with delay to handle up to 2 sequential dialogs
+    (sleep 0.3 && tmux send-keys -t "$pane" Enter \
+     && sleep 0.3 && tmux send-keys -t "$pane" Enter) &
+    disown
+  fi
+  command claude "$@"
+}
 
 cc() {
   local arg
   for arg in "$@"; do
     if [[ "$arg" == "--session-id" || "$arg" == "--resume" ]]; then
-      command claude "${CC_DEFAULT_FLAGS[@]}" "$@"
+      _cc_run "${CC_DEFAULT_FLAGS[@]}" "$@"
       return
     fi
   done
-  command claude --session-id "$(uuidgen | tr '[:upper:]' '[:lower:]')" "${CC_DEFAULT_FLAGS[@]}" "$@"
+  _cc_run --session-id "$(uuidgen | tr '[:upper:]' '[:lower:]')" "${CC_DEFAULT_FLAGS[@]}" "$@"
 }
 
 ccf() {
-  cc --fast "$@"
+  cc --settings '{"fastMode": true}' "$@"
+}
+
+ccs() {
+  cc --model claude-sonnet-4-6 "$@"
 }
