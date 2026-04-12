@@ -13,4 +13,11 @@ source "$SCRIPT_DIR/lib/get-session-id.sh"
 
 FORK_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 NEW_PANE=$(tmux split-window -h -c "$PANE_CWD" -P -F '#{pane_id}')
-tmux send-keys -t "$NEW_PANE" "cc --session-id '$FORK_ID' --resume '$SESSION_ID' --fork-session" Enter
+
+if [[ -n "$TEAM_NAME" ]]; then
+  # Leader has teammates — fork joins the same team so SendMessage still routes.
+  FORK_NAME="leader-fork-$(echo "$FORK_ID" | cut -c1-4)"
+  tmux send-keys -t "$NEW_PANE" "cc --session-id '$FORK_ID' --resume '$SESSION_ID' --fork-session --agent-id '${FORK_NAME}@${TEAM_NAME}' --agent-name '$FORK_NAME' --team-name '$TEAM_NAME' --parent-session-id '$TEAM_PARENT_SID'" Enter
+else
+  tmux send-keys -t "$NEW_PANE" "cc --session-id '$FORK_ID' --resume '$SESSION_ID' --fork-session" Enter
+fi
