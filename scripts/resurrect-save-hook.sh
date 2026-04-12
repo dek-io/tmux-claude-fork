@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 #
-# tmux-resurrect post-save hook: injects `--resume <session_id>` into Claude
-# pane commands so that resurrect restores each Claude session automatically.
+# tmux-resurrect post-save hook: normalizes Claude pane commands to
+# `cc --resume <id>` so resurrect restores sessions via the cc wrapper
+# (which applies CC_DEFAULT_FLAGS and auto-accepts startup dialogs).
 #
-# Parses --session-id from the saved command args — no tracking files needed.
+# For fork commands (--session-id A --resume B --fork-session), uses
+# --session-id (the forked session) as the resume target.
 # Called by resurrect with the save file path as $1.
 
 set -euo pipefail
@@ -23,16 +25,23 @@ while IFS= read -r line; do
     full_cmd="${fields[10]:-}"
     pane_dir="${fields[7]:-}"
 
-    if [[ "$full_cmd" == *claude* && "$full_cmd" != *--resume* ]]; then
+    if [[ "$full_cmd" == *claude* ]]; then
+      resume_id=""
+      # Prefer --session-id (this session) over --resume (parent for forks)
       if [[ "$full_cmd" =~ --session-id[[:space:]]([0-9a-f-]+) ]]; then
-        fields[10]=":claude --resume ${BASH_REMATCH[1]}"
+        resume_id="${BASH_REMATCH[1]}"
+      elif [[ "$full_cmd" =~ --resume[[:space:]]([0-9a-f-]+) ]]; then
+        resume_id="${BASH_REMATCH[1]}"
       fi
-    fi
+      if [[ -n "$resume_id" ]]; then
+        fields[10]=":cc --resume $resume_id"
+      fi
 
-    # Strip .claude/worktrees/<name> from Claude pane dirs so resurrect
-    # restores into the original project dir (where the session JSONL lives).
-    if [[ "$full_cmd" == *claude* && "$pane_dir" == */.claude/worktrees/* ]]; then
-      fields[7]="${pane_dir%%/.claude/worktrees/*}"
+      # Strip .claude/worktrees/<name> from Claude pane dirs so resurrect
+      # restores into the original project dir (where the session JSONL lives).
+      if [[ "$pane_dir" == */.claude/worktrees/* ]]; then
+        fields[7]="${pane_dir%%/.claude/worktrees/*}"
+      fi
     fi
 
     if [[ "${fields[10]:-}" != "$full_cmd" || "${fields[7]:-}" != "$pane_dir" ]]; then

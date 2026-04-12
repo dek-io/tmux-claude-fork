@@ -16,14 +16,22 @@ unalias ccf 2>/dev/null
 unalias ccs 2>/dev/null
 
 _cc_run() {
-  # Auto-accept startup dialogs (trust + dev channels) via tmux send-keys.
-  # No PTY wrapper needed — claude runs with direct TTY access.
-  if [[ -n "$TMUX" ]]; then
-    local pane
-    pane=$(tmux display-message -p '#{pane_id}')
-    # Send Enter twice with delay to handle up to 2 sequential dialogs
-    (sleep 0.3 && tmux send-keys -t "$pane" Enter \
-     && sleep 0.3 && tmux send-keys -t "$pane" Enter) &
+  # Auto-accept startup dialogs (trust + dev channels) by polling pane
+  # content for "Enter to confirm" and sending Enter when detected.
+  # Uses $TMUX_PANE (set per-pane by tmux) — tmux display-message returns
+  # the *active* pane which is wrong when cc is launched via send-keys.
+  if [[ -n "$TMUX_PANE" ]]; then
+    local pane="$TMUX_PANE"
+    (local sent=0
+    for _ in {1..20}; do
+      sleep 0.5
+      if tmux capture-pane -t "$pane" -p -J 2>/dev/null | grep -q "Enter to confirm"; then
+        tmux send-keys -t "$pane" Enter
+        sent=1
+      elif [ "$sent" = 1 ]; then
+        break
+      fi
+    done) &
     disown
   fi
   command claude "$@"
