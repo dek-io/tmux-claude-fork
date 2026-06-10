@@ -34,7 +34,9 @@ _cc_run() {
     done) &
     disown
   fi
-  command claude "$@"
+  # CC_LAUNCHER tells the fork scripts which wrapper to relaunch forks with.
+  # Outer wrappers (ccf, cccr, ...) set it before reaching here.
+  CC_LAUNCHER="${CC_LAUNCHER:-cc}" command claude "$@"
 }
 
 cc() {
@@ -49,9 +51,9 @@ cc() {
 }
 
 ccf() {
-  cc --settings '{"fastMode": true}' "$@"
+  CC_LAUNCHER="${CC_LAUNCHER:-ccf}" cc --settings '{"fastMode": true}' "$@"
 }
 
 ccs() {
-  cc --model claude-sonnet-4-6 "$@"
+  CC_LAUNCHER="${CC_LAUNCHER:-ccs}" cc --model claude-sonnet-4-6 "$@"
 }

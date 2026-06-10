@@ -17,7 +17,7 @@ NEW_PANE=$(tmux split-window -h -c "$PANE_CWD" -P -F '#{pane_id}')
 if [[ -n "$TEAM_NAME" ]]; then
   # Leader has teammates — fork joins the same team so SendMessage still routes.
   FORK_NAME="leader-fork-$(echo "$FORK_ID" | cut -c1-4)"
-  tmux send-keys -t "$NEW_PANE" "cc --session-id '$FORK_ID' --resume '$SESSION_ID' --fork-session --agent-id '${FORK_NAME}@${TEAM_NAME}' --agent-name '$FORK_NAME' --team-name '$TEAM_NAME' --parent-session-id '$TEAM_PARENT_SID'" Enter
+  tmux send-keys -t "$NEW_PANE" "$LAUNCHER --session-id '$FORK_ID' --resume '$SESSION_ID' --fork-session --agent-id '${FORK_NAME}@${TEAM_NAME}' --agent-name '$FORK_NAME' --team-name '$TEAM_NAME' --parent-session-id '$TEAM_PARENT_SID'" Enter
 else
-  tmux send-keys -t "$NEW_PANE" "cc --session-id '$FORK_ID' --resume '$SESSION_ID' --fork-session" Enter
+  tmux send-keys -t "$NEW_PANE" "$LAUNCHER --session-id '$FORK_ID' --resume '$SESSION_ID' --fork-session" Enter
 fi

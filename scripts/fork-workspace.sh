@@ -115,7 +115,7 @@ NEW_PANE=$(tmux split-window -h -c "$WORKSPACE_DIR" -P -F '#{pane_id}')
 
 if [[ -n "$TEAM_NAME" ]]; then
   FORK_NAME="leader-fork-$(date +%s | tail -c 5)"
-  tmux send-keys -t "$NEW_PANE" "source '$CC_SH' && cc --resume '$SESSION_ID' --fork-session --agent-id '${FORK_NAME}@${TEAM_NAME}' --agent-name '$FORK_NAME' --team-name '$TEAM_NAME' --parent-session-id '$TEAM_PARENT_SID'" Enter
+  tmux send-keys -t "$NEW_PANE" "source '$CC_SH' && $LAUNCHER --resume '$SESSION_ID' --fork-session --agent-id '${FORK_NAME}@${TEAM_NAME}' --agent-name '$FORK_NAME' --team-name '$TEAM_NAME' --parent-session-id '$TEAM_PARENT_SID'" Enter
 else
-  tmux send-keys -t "$NEW_PANE" "source '$CC_SH' && cc --resume '$SESSION_ID' --fork-session" Enter
+  tmux send-keys -t "$NEW_PANE" "source '$CC_SH' && $LAUNCHER --resume '$SESSION_ID' --fork-session" Enter
 fi
